@@ -14,11 +14,10 @@ const CartContainer = () => {
                 )}
             </header>
             <div>
-                {state.cart
-                    ? state.cart.map((item) => {
-                          return <CartItem key={item.id} {...item} />;
-                      })
-                    : null}
+                {state.cart &&
+                    state.cart.map((item) => {
+                        return <CartItem key={item.id} {...item} />;
+                    })}
             </div>
             {state.amount > 0 && (
                 <footer>

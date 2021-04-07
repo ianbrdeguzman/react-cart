@@ -1,60 +1,65 @@
-import React, { useState, useEffect, useContext, createContext } from 'react';
+import React, { useEffect, useReducer, createContext } from 'react';
 import axios from 'axios';
+import reducer from './reducer';
 
 const AppContext = createContext();
 
+const defaultState = {
+    cart: [],
+    total: 0,
+    amount: 0,
+};
+
 const AppProvider = ({ children }) => {
-    const [data, setData] = useState([]);
-    const [totalAmount, setTotalAmount] = useState(0);
-    const [totalPrice, setTotalPrice] = useState(0);
+    const [state, dispatch] = useReducer(reducer, defaultState);
+
+    const fetchData = async () => {
+        const url = 'https://course-api.com/react-useReducer-cart-project';
+        try {
+            const response = await axios.get(url);
+            if (response.status >= 400) {
+                throw new Error(response.statusText);
+            }
+            const data = response.data;
+            dispatch({ type: 'FETCH_ITEMS', payload: data });
+        } catch (error) {
+            alert(error);
+            console.error(error);
+        }
+    };
+
+    const clearCart = () => {
+        dispatch({ type: 'CLEAR_CART' });
+    };
+
+    const removeItem = (id) => {
+        dispatch({ type: 'REMOVE_ITEM', payload: id });
+    };
+
+    const increase = (id) => {
+        dispatch({ type: 'INCREASE', payload: id });
+    };
+
+    const decrease = (id) => {
+        dispatch({ type: 'DECREASE', payload: id });
+    };
 
     useEffect(() => {
-        const fetchData = async () => {
-            const url = 'https://course-api.com/react-useReducer-cart-project';
-            try {
-                const response = await axios.get(url);
-                if (response.status >= 400) {
-                    throw new Error(response.statusText);
-                }
-                const data = response.data;
-                setData(data);
-                setTotalAmount(data.length);
-                let total = 0;
-                data.forEach((item) => {
-                    const p = parseFloat(item.price);
-                    return (total = total + p);
-                });
-                setTotalPrice(total);
-            } catch (error) {
-                console.error(error);
-            }
-        };
         fetchData();
     }, []);
 
-    const clearCart = () => {
-        setData([]);
-        setTotalAmount(0);
-    };
+    useEffect(() => {
+        dispatch({ type: 'GET_TOTALS' });
+    }, [state.cart]);
 
-    const incrementItem = (id) => {
-        const item = data.find((item) => item.id === id);
-        console.log(item);
-        console.log('increment', id);
-    };
-
-    const decrementItem = (id) => {
-        console.log('decrement', id);
-    };
     return (
         <AppContext.Provider
             value={{
-                data,
-                totalAmount,
-                totalPrice,
+                state,
                 clearCart,
-                incrementItem,
-                decrementItem,
+                removeItem,
+                increase,
+                decrease,
             }}
         >
             {children}
@@ -62,5 +67,4 @@ const AppProvider = ({ children }) => {
     );
 };
 
-export { AppProvider };
-export { AppContext };
+export { AppProvider, AppContext };

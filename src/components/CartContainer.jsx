@@ -3,28 +3,29 @@ import CartItem from './CartItem';
 import { AppContext } from './context';
 
 const CartContainer = () => {
-    const { data, totalPrice, clearCart } = useContext(AppContext);
+    const { state, clearCart } = useContext(AppContext);
+
     return (
         <section className='cart'>
             <header>
                 <h2>your bag</h2>
-                {data.length === 0 && (
+                {state.amount === 0 && (
                     <h4 className='empty-cart'>is currently empty</h4>
                 )}
             </header>
             <div>
-                {data
-                    ? data.map((item) => {
-                          return <CartItem key={item.id} item={item} />;
+                {state.cart
+                    ? state.cart.map((item) => {
+                          return <CartItem key={item.id} {...item} />;
                       })
                     : null}
             </div>
-            {data.length > 1 && (
+            {state.amount > 0 && (
                 <footer>
                     <hr />
                     <div className='cart-total'>
                         <h4>
-                            total <span>${`${totalPrice}`}</span>
+                            total <span>${`${state.total}`}</span>
                         </h4>
                     </div>
                     <button onClick={clearCart} className='btn clear-btn'>
